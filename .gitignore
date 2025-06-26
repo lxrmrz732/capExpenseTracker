@@ -1,0 +1,3 @@
+# don't git binaries
+./bin/**
+*.jar
