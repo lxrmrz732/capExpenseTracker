@@ -152,7 +152,7 @@ public class ArrayExpenseStorage implements IExpenseStorage {
     /**
      * Save the current list of expenses to a scuffed CSV file.
      */
-    private void saveExpensesToFile() {
+    private void saveExpensesToFile() { // TODO: same one below
         try (PrintWriter writer = new PrintWriter(new FileWriter(this.filename))) {
             for (ExpenseRecord expense : this.expenses) {
                 writer.println(
@@ -169,7 +169,7 @@ public class ArrayExpenseStorage implements IExpenseStorage {
     /**
      * Load expenses from an existing CSV file at startup.
      */
-    private void loadExpensesFromFile() {
+    private void loadExpensesFromFile() { // TODO: add return for style
         try (BufferedReader reader = new BufferedReader(new FileReader(this.filename))) {
             String line;
             while ((line = reader.readLine()) != null) {
