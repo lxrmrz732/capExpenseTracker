@@ -202,7 +202,7 @@ public class ExpenseUI {
 	 * Displays the highest and lowest spending categories.
 	 */
 	private static void printCategoryExtremes() {
-		System.out.println("\n- - - Highest and Lowest Spend - - -");
+		System.out.println("\n- - - Category Extremes - - -");
 		System.out.println("Most expensive category: " + EXPENSE_TRACKER.getMostExpensiveCategory());
 		System.out.println("Least expensive category: " + EXPENSE_TRACKER.getLeastExpensiveCategory());
 	}
