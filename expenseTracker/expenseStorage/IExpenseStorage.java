@@ -1,6 +1,7 @@
 package expenseTracker.expenseStorage;
 
 import java.math.BigInteger;
+import java.util.Map;
 
 /**
  * Interface for expense storage.
@@ -18,15 +19,15 @@ public interface IExpenseStorage {
 	public void enterExpense(ExpenseRecord expense);
 	
 	/* app should provide "Total expense" */
-	public BigInteger findTotalExpense();
+	public BigInteger getTotalExpense();
 	
 	/* app should provide "Total expense by category" */
-	public BigInteger findTotalExpenseByCategory(String category);
+	public BigInteger getTotalExpenseByCategory(String category);
 	
 	/* app should provide "Expense trend" */
-	public void findExpenseTrend();
+	public Map<String, BigInteger> getExpenseTrend();
 	
 	/* app should provide "Highest and lowest spend category" */
-	public String findMostExpensiveCategory();
-	public String findLeastExpensiveCategory();
+	public String getMostExpensiveCategory();
+	public String getLeastExpensiveCategory();
 }

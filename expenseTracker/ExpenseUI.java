@@ -1,5 +1,5 @@
 /*
- * ExpenseApp.java
+ * ExpenseUI.java
  * 
  * Copyright 2025 Alex Ramírez <Reisen@6470beast>
  * 
@@ -23,7 +23,7 @@
  
 package expenseTracker;
 
-public class ExpenseApp {
+public class ExpenseUI {
 	
 	public static void main (String[] args) {
 		System.out.println("fortninte");
