@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.ArrayList;
-import java.util.Collections;
 
 public class ArrayExpenseStorage implements IExpenseStorage {
     /* - - - fields - - - */
@@ -21,7 +20,7 @@ public class ArrayExpenseStorage implements IExpenseStorage {
     private final String filename;
     private static final String DEFAULT_FILE_NAME = "expenses.csv";
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy");
-    SimpleDateFormat trendFormat = new SimpleDateFormat("yyyy-MM"); // TODO: make constant
+    private static final SimpleDateFormat TREND_FORMAT = new SimpleDateFormat("yyyy-MM");
 
     /* - - - constructors - - - */
     /**
@@ -29,7 +28,7 @@ public class ArrayExpenseStorage implements IExpenseStorage {
      */
     public ArrayExpenseStorage() {
         this.expenses = new ArrayList<ExpenseRecord>();
-        filename = DEFAULT_FILE_NAME;
+        this.filename = DEFAULT_FILE_NAME;
     }
 
     /**
@@ -66,7 +65,7 @@ public class ArrayExpenseStorage implements IExpenseStorage {
      * @return The total expense amount.
      */
     public BigInteger getTotalExpense() {
-        return expenses.stream()
+        return this.expenses.stream()
                 .map(ExpenseRecord::amount)
                 .reduce(BigInteger.ZERO, BigInteger::add);
     }
@@ -77,10 +76,11 @@ public class ArrayExpenseStorage implements IExpenseStorage {
      * @return A map where keys are categories and values are total amounts.
      */
     public Map<String, BigInteger> getTotalExpenseByCategory() {
-        return expenses.stream()
+        return this.expenses.stream()
                 .collect(Collectors.groupingBy(
                         ExpenseRecord::category,
-                        Collectors.mapping(ExpenseRecord::amount,
+                        Collectors.mapping(
+                                ExpenseRecord::amount,
                                 Collectors.reducing(BigInteger.ZERO, BigInteger::add))));
     }
 
@@ -88,33 +88,36 @@ public class ArrayExpenseStorage implements IExpenseStorage {
      * Calculates the total expenses for a given category.
      * 
      * @param category the "category" String to find
-     * @return a BigInteger corresponding
+     * 
+     * @return a BigInteger corresponding to the expense
+     *         of the given category.
      */
     public BigInteger getTotalExpenseByCategory(String category) {
         return this.getTotalExpenseByCategory().get(category);
     }
 
     /**
-     * Identifies the category with the highest total spending.
+     * Identifies the category with the highest total expense.
      * 
-     * @return The category with the highest spending, or "N/A" if no expenses
-     *         exist.
+     * @return a String representing the "category" with the greatest
+     *         "amount" field , or null if no expenses exist.
      */
     public String getMostExpensiveCategory() {
-        return getTotalExpenseByCategory().entrySet().stream()
-                .max(Map.Entry.comparingByValue())
+        return this.getTotalExpenseByCategory().entrySet().stream()
+                .max(Map.Entry.comparingByValue()) // max
                 .map(Map.Entry::getKey)
                 .orElse(null);
     }
 
     /**
-     * Identifies the category with the lowest total spending.
+     * Identifies the category with the lowest total expense.
      * 
-     * @return The category with the lowest spending, or "N/A" if no expenses exist.
+     * @return a String representing the "category" with the least
+     *         "amount" field , or null if no expenses exist.
      */
     public String getLeastExpensiveCategory() {
-        return getTotalExpenseByCategory().entrySet().stream()
-                .min(Map.Entry.comparingByValue())
+        return this.getTotalExpenseByCategory().entrySet().stream()
+                .min(Map.Entry.comparingByValue()) // min
                 .map(Map.Entry::getKey)
                 .orElse(null);
     }
@@ -130,19 +133,10 @@ public class ArrayExpenseStorage implements IExpenseStorage {
         return expenses.stream()
                 .sorted((e1, e2) -> e1.date().compareTo(e2.date()))
                 .collect(Collectors.groupingBy(
-                        expense -> trendFormat.format(expense.date()),
+                        expense -> TREND_FORMAT.format(expense.date()),
                         Collectors.mapping(
                                 ExpenseRecord::amount,
                                 Collectors.reducing(BigInteger.ZERO, BigInteger::add))));
-    }
-
-    /**
-     * Returns a list of all expenses.
-     * 
-     * @return An unmodifiable list of expenses.
-     */
-    public List<ExpenseRecord> getExpenses() {
-        return Collections.unmodifiableList(this.expenses);
     }
 
     /**
@@ -159,7 +153,7 @@ public class ArrayExpenseStorage implements IExpenseStorage {
                                 DATE_FORMAT.format(expense.date()));
             }
         } catch (IOException e) {
-            System.out.println("Error saving expenses to file: " + e.getMessage());
+            System.err.println("Error encountered: " + e.getMessage() + ". Aborting file write.");
         }
     }
 
@@ -180,13 +174,12 @@ public class ArrayExpenseStorage implements IExpenseStorage {
                         Date date = DATE_FORMAT.parse(parts[3]);
                         expenses.add(new ExpenseRecord(category, amount, data, date));
                     } catch (ParseException | NumberFormatException e) {
-                        System.out.println("Skipping invalid expense record: " + line);
+                        System.out.println("Invalid expense record: " + line);
                     }
                 }
             }
         } catch (IOException e) {
-            // File might not exist on first run, which is fine.
-            System.out.println("No previous expense data found. Starting fresh.");
+            System.err.println("Error encountered: " + e.getMessage() + ". Aborting file read.");
         }
     }
 }

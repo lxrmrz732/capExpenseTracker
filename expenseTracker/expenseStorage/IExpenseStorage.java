@@ -22,6 +22,7 @@ public interface IExpenseStorage {
 	public BigInteger getTotalExpense();
 	
 	/* app should provide "Total expense by category" */
+	public Map<String, BigInteger> getTotalExpenseByCategory();
 	public BigInteger getTotalExpenseByCategory(String category);
 	
 	/* app should provide "Expense trend" */
