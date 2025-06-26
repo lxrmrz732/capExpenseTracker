@@ -8,4 +8,4 @@ import java.util.Date;
  * Each expense needs a category, an amount, some "data" (a typo?)
  * and a timestamp of when it happened.
  */
-record ExpenseRecord(String category, BigInteger amount, String data, Date date) {};
+public record ExpenseRecord(String category, BigInteger amount, String data, Date date) {};

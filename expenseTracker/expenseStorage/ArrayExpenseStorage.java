@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class ArrayExpenseStorage implements IExpenseStorage {
     /* - - - fields - - - */
@@ -130,7 +131,7 @@ public class ArrayExpenseStorage implements IExpenseStorage {
      *         is the total amount.
      */
     public Map<String, BigInteger> getExpenseTrend() {
-        return expenses.stream()
+        return this.expenses.stream()
                 .sorted((e1, e2) -> e1.date().compareTo(e2.date()))
                 .collect(Collectors.groupingBy(
                         expense -> TREND_FORMAT.format(expense.date()),
@@ -140,11 +141,19 @@ public class ArrayExpenseStorage implements IExpenseStorage {
     }
 
     /**
-     * Saves the current list of expenses to a CSV file.
-     * This ensures data persistence between application runs.
+     * Return a list of all expenses.
+     * 
+     * @return An unmodifiable list of expenses.
+     */
+    public List<ExpenseRecord> listAllExpenses() {
+        return Collections.unmodifiableList(this.expenses);
+    }
+
+    /**
+     * Save the current list of expenses to a scuffed CSV file.
      */
     private void saveExpensesToFile() {
-        try (PrintWriter writer = new PrintWriter(new FileWriter(filename))) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(this.filename))) {
             for (ExpenseRecord expense : this.expenses) {
                 writer.println(
                         expense.category() + "," +
@@ -158,8 +167,7 @@ public class ArrayExpenseStorage implements IExpenseStorage {
     }
 
     /**
-     * Loads expenses from the CSV file at startup.
-     * This populates the expense list with previously saved data.
+     * Load expenses from an existing CSV file at startup.
      */
     private void loadExpensesFromFile() {
         try (BufferedReader reader = new BufferedReader(new FileReader(this.filename))) {
