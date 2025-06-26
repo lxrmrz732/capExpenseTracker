@@ -24,6 +24,7 @@
 package expenseTracker;
 
 import java.math.BigInteger;
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -34,23 +35,19 @@ import java.util.Scanner;
 import expenseTracker.expenseStorage.*;
 
 public class ExpenseUI {
-	private static final IExpenseStorage expenseTracker = new ArrayExpenseStorage();
-	private static final Scanner scanner = new Scanner(System.in);
+	/* - - - fields - - - */
+	private static final IExpenseStorage EXPENSE_TRACKER = new ArrayExpenseStorage(null);
+	private static final Scanner SCANNER = new Scanner(System.in);
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy");
 
+	/* - - - methods - - - */
 	public static void main(String[] args) {
-		run(); // TODO: refactor
-	}
+		/* symbols */
+		int choice = 0;
 
-	/**
-	 * The main application loop. Displays a menu and processes user input.
-	 */
-	public static void run() {
 		while (true) {
 			printMenu();
-			int choice = getUserChoice(); // TODO: print BigInteger as decimal with 2 places
-
-			switch (choice) {
+			switch (choice = getUserChoice()) {
 				case 1:
 					addExpense();
 					break;
@@ -58,24 +55,24 @@ public class ExpenseUI {
 					printExpenses();
 					break;
 				case 3:
-					viewTotalExpense();
+					printTotalExpense();
 					break;
 				case 4:
-					viewExpenseByCategory();
+					printExpenseByCategory();
 					break;
 				case 5:
-					viewHighestAndLowestSpend(); // TODO: rename
+					printCategoryExtremes();
 					break;
 				case 6:
-					viewExpenseTrend();
+					printExpenseTrend();
 					break;
 				case 7:
-					System.out.println("Exiting application. Goodbye!");
+					System.out.println("Exiting application.");
 					return;
 				default:
-					System.out.println("Invalid choice. Please try again.");
+					System.err.printf("Invalid choice: %d\n", choice);
 			}
-			System.out.println(); // For spacing
+			System.out.println();
 		}
 	}
 
@@ -83,124 +80,174 @@ public class ExpenseUI {
 	 * Prints the main menu options to the console.
 	 */
 	private static void printMenu() {
-		System.out.println("--- Expense Tracker Menu ---");
-		System.out.println("1. Add a new expense");
-		System.out.println("2. View all expenses");
-		System.out.println("3. View total expense");
-		System.out.println("4. View total expense by category");
-		System.out.println("5. View highest and lowest spend categories");
-		System.out.println("6. View expense trend (by month)");
-		System.out.println("7. Exit");
+		System.out.print("""
+				- - - Expense Tracker Menu - - -
+				1. Add a new expense
+				2. View all expenses
+				3. View total expense
+				4. View total expense by category
+				5. View most and least expensive categories
+				6. View expense trend
+				7. Exit
+				""");
 		System.out.print("Enter your choice: ");
 	}
 
 	/**
-	 * Reads and validates the user's menu choice.
+	 * Reads the user's menu choice from stdin.
 	 * 
 	 * @return The user's integer choice.
 	 */
 	private static int getUserChoice() {
-		while (!scanner.hasNextInt()) {
-			System.out.print("Invalid input. Please enter a number: ");
-			scanner.next(); // Consume the invalid input
+		while (!SCANNER.hasNextInt()) {
+			System.err.print("Invalid input. Enter an integer: ");
+			SCANNER.next(); // Consume the invalid input
 		}
-		return scanner.nextInt();
+		return SCANNER.nextInt();
 	}
 
 	/**
-	 * Handles the logic for adding a new expense based on user input.
+	 * Add a new expense based on user input from stdin.
 	 */
 	private static void addExpense() {
-		scanner.nextLine(); // Consume newline left-over
-
-		System.out.print("Enter expense category: ");
-		String category = scanner.nextLine();
-
+		/* symbols */
+		String category = null;
 		BigInteger amount = null;
+		String data = null;
+		Date date = null;
+
+		SCANNER.nextLine(); // Consume newline left-over
+
+		/* Get category */
+		System.out.print("Enter expense category: ");
+		category = SCANNER.nextLine();
+
+		/* Get amount */
 		while (amount == null) {
 			System.out.print("Enter expense amount: ");
 			try {
-				amount = new BigInteger(scanner.next());
+				amount = floatStringToInt(SCANNER.next());
 				if (amount.compareTo(BigInteger.ZERO) < 0) {
-					System.out.println("Amount cannot be negative.");
+					System.err.println("Amount cannot be negative.");
 					amount = null; // Reset for re-looping
 				}
 			} catch (NumberFormatException e) {
-				System.out.println("Invalid amount. Please enter a valid number.");
+				System.err.printf("Invalid amount: %s.\nError message: %s\n",
+						amount,
+						e.getMessage());
 			}
 		}
+		SCANNER.nextLine(); // Consume newline
 
-		scanner.nextLine(); // Consume newline
+		/* Get data */
+		System.out.print("Enter expense data: ");
+		data = SCANNER.nextLine();
 
-		Date date = null;
+		/* Get date */
 		while (date == null) {
 			System.out.print("Enter date (MM/dd/yyyy): ");
-			String dateString = scanner.nextLine();
+			String dateString = SCANNER.nextLine();
 			try {
 				date = DATE_FORMAT.parse(dateString);
 			} catch (ParseException e) {
-				System.out.println("Invalid date format. Please use MM/dd/yyyy.");
+				System.err.printf("Invalid date format. Error: %s\n",
+						e.getMessage());
 			}
 		}
 
-		expenseTracker.enterExpense(new ExpenseRecord(category, amount, "", date)); // TODO: add data
-		System.out.println("Expense added successfully!");
+		/* Submit expense to backend */
+		EXPENSE_TRACKER.enterExpense(new ExpenseRecord(category, amount, data, date));
+		System.out.println("Expense recorded.");
+		return;
 	}
 
 	/**
 	 * Prints a list of all recorded expenses.
 	 */
 	private static void printExpenses() {
-		System.out.println("\n--- All Expenses ---");
-		List<ExpenseRecord> expenses = expenseTracker.listAllExpenses();
+		System.out.println("\n- - - All Expenses - - -");
+		List<ExpenseRecord> expenses = EXPENSE_TRACKER.listAllExpenses();
 		if (expenses.isEmpty()) {
 			System.out.println("No expenses recorded yet.");
 		} else {
 			expenses.forEach(System.out::println);
 		}
+		return;
 	}
 
 	/**
 	 * Displays the single total expense amount.
 	 */
-	private static void viewTotalExpense() {
-		System.out.println("\n--- Total Expense ---");
-		System.out.printf("Total expense: $%.2f%n", expenseTracker.getTotalExpense());
+	private static void printTotalExpense() {
+		System.out.println("\n- - - Total Expense - - -");
+		System.out.printf("Total expense: $%.2f%n", intToFloat(EXPENSE_TRACKER.getTotalExpense()));
 	}
 
 	/**
 	 * Displays the total expense for each category.
 	 */
-	private static void viewExpenseByCategory() {
-		System.out.println("\n--- Expense by Category ---");
-		Map<String, BigInteger> categoryTotals = expenseTracker.getTotalExpenseByCategory();
+	private static void printExpenseByCategory() {
+		System.out.println("\n- - - Expense by Category - - -");
+		Map<String, BigInteger> categoryTotals = EXPENSE_TRACKER.getTotalExpenseByCategory();
 		if (categoryTotals.isEmpty()) {
 			System.out.println("No expenses to categorize.");
 		} else {
 			categoryTotals
-					.forEach((category, total) -> System.out.printf("Category: %-15s Total: $%.2f%n", category, total));
+					.forEach((category, total) -> System.out.printf(
+							"Category: %-15s Total: $%.2f%n", category, intToFloat(total)));
 		}
 	}
 
 	/**
 	 * Displays the highest and lowest spending categories.
 	 */
-	private static void viewHighestAndLowestSpend() {
-		System.out.println("\n--- Highest and Lowest Spend ---");
-		System.out.println("Highest spend category: " + expenseTracker.getMostExpensiveCategory());
-		System.out.println("Lowest spend category: " + expenseTracker.getLeastExpensiveCategory());
+	private static void printCategoryExtremes() {
+		System.out.println("\n- - - Highest and Lowest Spend - - -");
+		System.out.println("Most expensive category: " + EXPENSE_TRACKER.getMostExpensiveCategory());
+		System.out.println("Least expensive category: " + EXPENSE_TRACKER.getLeastExpensiveCategory());
 	}
 
 	/**
-	 * Displays the monthly spending trend.
+	 * Displays the total expense per month.
 	 */
-	private static void viewExpenseTrend() {
-		System.out.println("\n--- Monthly Expense Trend ---");
-		Map<String, BigInteger> trendData = expenseTracker.getExpenseTrend();
+	private static void printExpenseTrend() {
+		System.out.println("\n- - - Monthly Expense Trend - - -");
+		Map<String, BigInteger> trendData = EXPENSE_TRACKER.getExpenseTrend();
 		if (trendData.isEmpty()) {
 			System.out.println("Not enough data to show a trend.");
 		} else {
-			trendData.forEach((month, total) -> System.out.printf("Month: %s, Total Spend: $%.2f%n", month, total));
+			trendData.forEach((month, total) -> System.out.printf(
+					"Month: %s, Total Expense: $%.2f%n", month, intToFloat(total)));
 		}
+	}
+
+	/**
+	 * Convert the backend integer "amount" representation to a float for display.
+	 * The BigInteger "amount" in an ExpenseRecord represents whole cents, so
+	 * this function returns the equivalent dollar amount (with precision
+	 * consequences).
+	 * 
+	 * @param intVal BigInteger representing cents to convert to dollars
+	 * 
+	 * @return a double representing the corresponding dollar amount
+	 */
+	private static double intToFloat(BigInteger intVal) {
+		return intVal.doubleValue() / 100.0;
+	}
+
+	/**
+	 * Convert the frontend floating-point "amount" representation
+	 * to a BigInteger for storage.
+	 * The BigInteger "amount" in an ExpenseRecord represents whole cents, so
+	 * this function converts the equivalent dollar amount (with precision
+	 * consequences).
+	 * 
+	 * @param floatString string representing dollars to convert to cents
+	 * 
+	 * @return a BigInteger representing the corresponding cent amount
+	 */
+	private static BigInteger floatStringToInt(String floatString) {
+		BigDecimal bd = new BigDecimal(floatString);
+		return bd.multiply(new BigDecimal(100)).toBigInteger();
 	}
 }
