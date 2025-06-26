@@ -3,8 +3,9 @@ Epic expense tracker application for Capgemini.
 
 ## Build instructions:
 1. Clone the repository.
-2. ```make``` with the provided ```Makefile``` (yes I'm using Make with Java, sue me)
-3. The result of the build process is ```expenseTracker.jar```
+2. ```make``` with the provided ```Makefile``` (yes I'm using Make with Java, sue me).
+3. The result of the build process is ```expenseTracker.jar```.
+4. Clean up the compiled binaries with ```make clean``` once you're done.
 
 ## Usage:
 - ```java -jar expenseTracker.jar```
