@@ -10,7 +10,7 @@ Epic expense tracker application for Capgemini.
 ## Usage:
 - ```java -jar expenseTracker.jar```
 - The program is fully interactive.
-- While running, it stores data to ```expenses.csv``` in the current directory.
+- While running, it stores data to ```expenses.csv``` in the current directory. This is for persistence across subsequent executions.
 
 ## Dependencies:
 1. At least OpenJDK 17. This project was made with OpenJDK 24. You'll need the ```java```, ```javac```, and ```jar``` command line utilities.
