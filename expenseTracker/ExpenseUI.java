@@ -100,7 +100,7 @@ public class ExpenseUI {
 	 */
 	private static int getUserChoice() {
 		while (!SCANNER.hasNextInt()) {
-			System.err.print("Invalid input. Enter an integer: ");
+			System.err.print("Invalid choice.\nEnter an integer: ");
 			SCANNER.next(); // Consume the invalid input
 		}
 		return SCANNER.nextInt();
