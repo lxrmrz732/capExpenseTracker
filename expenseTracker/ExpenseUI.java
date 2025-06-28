@@ -132,8 +132,7 @@ public class ExpenseUI {
 					amount = null; // Reset for re-looping
 				}
 			} catch (NumberFormatException e) {
-				System.err.printf("Invalid amount: %s.\nError message: %s\n",
-						amount,
+				System.err.printf("Invalid amount.\nError message: %s\n",
 						e.getMessage());
 			}
 		}
@@ -150,7 +149,7 @@ public class ExpenseUI {
 			try {
 				date = DATE_FORMAT.parse(dateString);
 			} catch (ParseException e) {
-				System.err.printf("Invalid date format. Error: %s\n",
+				System.err.printf("Invalid date.\nError message: %s\n",
 						e.getMessage());
 			}
 		}
@@ -194,7 +193,7 @@ public class ExpenseUI {
 		} else {
 			categoryTotals
 					.forEach((category, total) -> System.out.printf(
-							"Category: %-15s Total: $%.2f%n", category, intToFloat(total)));
+							"Category: %-15s, Total expense: $%.2f%n", category, intToFloat(total)));
 		}
 	}
 
@@ -214,10 +213,10 @@ public class ExpenseUI {
 		System.out.println("\n- - - Monthly Expense Trend - - -");
 		Map<String, BigInteger> trendData = EXPENSE_TRACKER.getExpenseTrend();
 		if (trendData.isEmpty()) {
-			System.out.println("Not enough data to show a trend.");
+			System.out.println("No expenses to show a trend.");
 		} else {
 			trendData.forEach((month, total) -> System.out.printf(
-					"Month: %s, Total Expense: $%.2f%n", month, intToFloat(total)));
+					"Month: %s, Total expense: $%.2f%n", month, intToFloat(total)));
 		}
 	}
 
